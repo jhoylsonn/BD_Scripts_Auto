@@ -17,7 +17,7 @@ Execute os seguintes comandos no PowerShell como administrador:
 winrm quickconfig 
 
 # Permitir tráfego não criptografado
-Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+Set-Item WSMan:\localhost\Client\AllowUnencrypted -Value $true
 
 
 
