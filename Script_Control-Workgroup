@@ -1,6 +1,9 @@
 #1-No Host (sua máquina que envia os comandos)
 #Execute os seguintes comandos no PowerShell como administrador:
 
+# Confiar em todos os hosts (grupo de trabalho)
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
+
 #Liberar e configurar Os serviços Winrm
 winrm quickconfig 
 
@@ -10,7 +13,7 @@ winrm quickconfig -force
 # Permitir tráfego não criptografado
 Set-Item WSMan:\localhost\Client\AllowUnencrypted -Value $true
 
-# Permitir tráfego não criptografado no cliente
+# Permitir tráfego não criptografado no cliente 
 winrm set winrm/config/client '@{AllowUnencrypted="true"}'
 
 # Permitir autenticação básica no cliente
