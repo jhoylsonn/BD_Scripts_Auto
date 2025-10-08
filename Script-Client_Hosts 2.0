@@ -1,0 +1,45 @@
+#2-No Cliente (máquina que vai receber os comandos)
+#Na máquina remota, também no PowerShell como administrador, execute:
+
+
+# Habilitar PowerShell Remoting
+Enable-PSRemoting -Force
+
+# Permitir autenticação básica no serviço
+Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+
+# Permitir tráfego não criptografado no serviço
+Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+
+# Permitir autenticação básica no cliente
+Set-Item WSMan:\localhost\Client\Auth\Basic -Value $true
+
+# Permitir tráfego não criptografado no cliente
+Set-Item WSMan:\localhost\Client\AllowUnencrypted -Value $true
+
+# Exibir configurações do cliente (equivalente ao winrm get)
+Get-Item WSMan:\localhost\Client
+
+# Liberar Área de Trabalho Remota no firewall
+Enable-NetFirewallRule -DisplayGroup "Área de Trabalho Remota"
+
+# Liberar porta 5985 no firewall (WinRM HTTP)
+New-NetFirewallRule -Name "WinRM-HTTP" -DisplayName "WinRM over HTTP" `
+  -Protocol TCP -LocalPort 5985 -Action Allow
+
+# Liberar Ping (ICMPv4) em todos os perfis de rede
+New-NetFirewallRule -Name "Allow-Ping" -DisplayName "Allow ICMPv4-In" `
+  -Protocol ICMPv4 -IcmpType 8 -Direction Inbound -Action Allow -Profile Any
+
+# Instalar Chocolatey
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = `
+  [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString(`
+  'https://community.chocolatey.org/install.ps1'))
+
+# Instalar Remote Desktop Manager Agent (sem confirmação)
+choco install rdmagent -y
+
+# Iniciar o agente após instalação
+Start-Process "C:\Program Files (x86)\Devolutions\Remote Desktop Manager Agent\RDMAgent.exe" -Verb RunAs
