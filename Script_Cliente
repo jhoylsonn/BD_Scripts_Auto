@@ -1,0 +1,20 @@
+#1-No Host (sua máquina que envia os comandos)
+#Execute os seguintes comandos no PowerShell como administrador:
+
+#Liberar e configurar Os serviços Winrm
+winrm quickconfig 
+
+# Habilitar e configurar o serviço WinRM
+winrm quickconfig -force
+
+# Permitir tráfego não criptografado
+Set-Item WSMan:\localhost\Client\AllowUnencrypted -Value $true
+
+# Permitir tráfego não criptografado no cliente
+winrm set winrm/config/client '@{AllowUnencrypted="true"}'
+
+# Permitir autenticação básica no cliente
+winrm set winrm/config/client/auth '@{Basic="true"}'
+
+# Verificar configurações atuais do cliente
+winrm get winrm/config/client
