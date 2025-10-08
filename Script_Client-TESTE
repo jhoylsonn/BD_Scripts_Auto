@@ -1,0 +1,25 @@
+# Habilitar e configurar o serviço WinRM
+winrm quickconfig -force
+
+# Permitir tráfego não criptografado no cliente
+winrm set winrm/config/client '@{AllowUnencrypted="true"}'
+
+# Permitir autenticação básica no cliente
+winrm set winrm/config/client/auth '@{Basic="true"}'
+
+# Adicionar todos os hosts como confiáveis (grupo de trabalho)
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
+
+# Exibir configurações atuais do cliente
+winrm get winrm/config/client
+
+# Liberar Área de Trabalho Remota no firewall
+Enable-NetFirewallRule -DisplayGroup "Área de Trabalho Remota"
+
+# Liberar porta 5985 no firewall (WinRM HTTP)
+New-NetFirewallRule -Name "WinRM-HTTP" -DisplayName "WinRM over HTTP" `
+  -Protocol TCP -LocalPort 5985 -Action Allow
+
+# Liberar Ping (ICMPv4) em todos os perfis de rede
+New-NetFirewallRule -Name "Allow-Ping" -DisplayName "Allow ICMPv4-In" `
+  -Protocol ICMPv4 -IcmpType 8 -Direction Inbound -Action Allow -Profile Any
