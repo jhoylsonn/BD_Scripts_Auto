@@ -1,1 +1,15 @@
 
+Última melhoria: desativar múltiplas interfaces de rede
+ o script desativa mais de uma interface, como "Wi-Fi" e "Lan", se ambas estiverem presentes. Aqui está o script completo com:
+
+
+✅ Verificação de ping antes de tentar conexão
+✅ Verificação de WinRM
+✅ Desativação de múltiplas interfaces (Wi-Fi e Lan)
+✅ Mensagens claras no console
+✅ Log detalhado salvo no mesmo diretório do script
+✅ Timeout reduzido para evitar reconexões longas
+✅ Correção de interpolações com : para evitar erros
+✅ A pasta C:\LogsDesativacaoWiFi será criada automaticamente
+✅ Cada execução gera um novo arquivo com data e hora no nome
+✅ Ideal para auditoria, histórico e análise por lote
