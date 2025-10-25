@@ -1,0 +1,80 @@
+# Lista de máquinas para teste
+$computadores = @("HPLTITESTEX1", "desk1", "HPLSALUXPN02")  # Substitua pelos nomes reais ou IPs
+
+# Interfaces que devem ser desativadas
+$interfacesAlvo = @("Wi-Fi", "Lan")
+
+# Caminho da pasta de log
+$pastaLog = "C:\LogsDesativacaoWiFi"
+
+# Cria a pasta de log se não existir
+if (-not (Test-Path $pastaLog)) {
+    New-Item -Path $pastaLog -ItemType Directory | Out-Null
+}
+
+# Gera nome de arquivo com data e hora
+$dataExecucao = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+$nomeArquivoLog = "log_desativacao_interfaces_$dataExecucao.csv"
+$logSaida = Join-Path $pastaLog $nomeArquivoLog
+
+# Cabeçalho do log
+"DataHora;Computador;Interface;Status;Mensagem" | Out-File -FilePath $logSaida -Encoding UTF8
+
+# Solicita credenciais do administrador de domínio
+$credencial = Get-Credential -Message "Digite as credenciais de administrador do domínio"
+
+# Define opções de sessão remota com timeout reduzido
+$sessionOptions = New-PSSessionOption -OperationTimeout 60000  # 60 segundos
+
+# Loop nas máquinas
+foreach ($computador in $computadores) {
+    $dataHora = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Write-Host "`n[$dataHora] Verificando comunicação com $computador..."
+
+    # Teste de ping
+    if (Test-Connection -ComputerName $computador -Count 2 -Quiet) {
+        Write-Host "Ping OK. Verificando WinRM..."
+
+        # Verifica se WinRM está acessível
+        if (Test-WSMan -ComputerName $computador -ErrorAction SilentlyContinue) {
+            Write-Host "WinRM está acessível em $computador. Tentando desativar interfaces..."
+
+            try {
+                Invoke-Command -ComputerName $computador -Credential $credencial -SessionOption $sessionOptions -ArgumentList $interfacesAlvo -ScriptBlock {
+                    param($interfacesAlvo)
+                    $resultados = @()
+
+                    foreach ($nome in $interfacesAlvo) {
+                        $interface = Get-NetAdapter | Where-Object { $_.Name -eq $nome }
+                        if ($interface) {
+                            Disable-NetAdapter -Name $nome -Confirm:$false
+                            $resultados += "$nome;Sucesso;Interface '$nome' desabilitada com sucesso"
+                        } else {
+                            $resultados += "$nome;Aviso;Interface '$nome' não encontrada"
+                        }
+                    }
+
+                    return $resultados
+                } -ErrorAction Stop | ForEach-Object {
+                    foreach ($linha in $_) {
+                        $partes = $linha.Split(';')
+                        $interface = $partes[0]
+                        $status = $partes[1]
+                        $mensagem = $partes[2]
+                        "$dataHora;$computador;$interface;$status;$mensagem" | Out-File -FilePath $logSaida -Append -Encoding UTF8
+                        Write-Host ($computador + " [" + $interface + "]: " + $mensagem)
+                    }
+                }
+            } catch {
+                "$dataHora;$computador;N/A;Erro;$($_.Exception.Message)" | Out-File -FilePath $logSaida -Append -Encoding UTF8
+                Write-Host ("Erro ao executar comando remoto em " + $computador + ": " + $_.Exception.Message)
+            }
+        } else {
+            "$dataHora;$computador;N/A;Falha;WinRM não está acessível" | Out-File -FilePath $logSaida -Append -Encoding UTF8
+            Write-Host "WinRM não está acessível em $computador. Verifique se o serviço está habilitado e o firewall permite conexões."
+        }
+    } else {
+        "$dataHora;$computador;N/A;Falha;Ping não respondeu" | Out-File -FilePath $logSaida -Append -Encoding UTF8
+        Write-Host "Ping falhou para $computador. Máquina pode estar offline ou inacessível."
+    }
+}
