@@ -1,0 +1,10 @@
+ O que esse script faz:
+• 	Pergunta o nome do usuário que você quer verificar.
+• 	Busca dentro da OU .
+• 	Mostra:
+• 	Nome
+• 	Status (Ativo/Desativado)
+• 	Último login
+• 	Último mês de login
+• 	Dias de inatividade
+• 	Pergunta se você deseja desativar o usuário.
