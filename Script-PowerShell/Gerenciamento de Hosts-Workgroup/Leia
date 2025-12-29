@@ -1,1 +1,13 @@
+Script para Desligamento Remoto de maquinas em Workgrop
+Abaixo esta a descrição de cada SCRIPT e suas funçoes.
 
+
+1° O Script(PC_Controlador) - Workgroup
+É para o PC controlador que vai disparar os comandos.Esse Script Serve para fazer algumas liberaçoes de permissoes que são necessarias em Workgroup.
+
+2° O Script_(PCs Clientes) - Workgroup
+É Para as maquinas clientes e serve ao mesmo propósito, executar liberaçoes no firewall e serviços do sistema.
+
+3° Shutdown em Lotes-Workgroup
+E Esse é o Script de desligamento.
+As máquinas em workgroup configuradas com esses scripts, podem ser DESLIGADAS ou REINICIADAS, dependendo da necessidade.
