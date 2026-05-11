@@ -1,2 +1,1 @@
-
-oijhóihbobuipçvbyouvtvy
+Scripts Diversos para administração de Sistemas!
